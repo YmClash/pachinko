@@ -7,6 +7,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     curl \
     wget \
     git \
+    npm \
     build-essential \
     ca-certificates \
     gnupg \
@@ -26,11 +27,19 @@ USER node
 # Set working directory
 WORKDIR /workspace
 
+
+
 # Copy package files
 COPY --chown=node:node package*.json ./
+#COPY --chown=node:node package.json package-lock.json ./
+
+
+RUN ls -la && cat package-lock.json | head -n 5 || echo "package-lock.json fehlt"
+
+RUN curl -v https://registry.npmjs.com/
 
 # Install dependencies
-RUN npm install
+#RUN npm install
 
 # Copy the rest of the application
 COPY --chown=node:node . .
