@@ -1,0 +1,100 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: 🔍 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🏗️ Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: 📦 Install dependencies
+      run: npm ci
+    
+    - name: 🧹 Run linter
+      run: npm run lint
+      continue-on-error: true
+    
+    - name: 🔍 Type check
+      run: npm run type-check || npx tsc --noEmit
+    
+    - name: 🧪 Run tests
+      run: npm test -- --passWithNoTests
+      
+    - name: 🏗️ Build application
+      run: npm run build
+
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    
+    steps:
+    - name: 🔍 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: 📝 Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: pachinko-chat
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+    
+    - name: 🏗️ Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: false
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    
+    steps:
+    - name: 🔍 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🏗️ Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+    
+    - name: 📦 Install dependencies
+      run: npm ci
+    
+    - name: 🔒 Run security audit
+      run: npm audit --audit-level=moderate
+      continue-on-error: true
+    
+    - name: 🔍 Run dependency check
+      run: |
+        npm list --depth=0
+        npx license-checker --summary
