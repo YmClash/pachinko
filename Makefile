@@ -3,7 +3,7 @@
 .PHONY: help dev prod build clean logs shell test lint check-docker
 
 # Detect docker compose command
-DOCKER_COMPOSE := $(shell docker compose version > /dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
+#DOCKER_COMPOSE := $(shell docker compose version > /dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
 
 # Default target
 help:

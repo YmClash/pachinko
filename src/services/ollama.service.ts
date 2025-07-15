@@ -1,6 +1,5 @@
 import type {
   OllamaConfig,
-  StreamResponse,
   GenerateRequest,
   ModelsResponse,
 } from '@/types/ollama.types'
@@ -19,7 +18,7 @@ export class OllamaService {
     this.config = {
       retryAttempts: 3,
       retryDelay: 1000,
-      timeout: 30000,
+      timeout: 120000, // Increased to 2 minutes for slower models
       ...config,
     }
   }
@@ -82,14 +81,17 @@ export class OllamaService {
     const timeoutId = setTimeout(() => {
       this.abortController?.abort()
     }, this.config.timeout!)
+    
+    // Add a flag to track if we've received any response
+    // let hasReceivedResponse = false
 
     try {
       const response = await this.retryWithBackoff(async () => {
         // Use direct URL instead of proxy in development
-        const baseUrl = this.config.baseUrl.includes('localhost') 
-          ? this.config.baseUrl 
+        const baseUrl = this.config.baseUrl.includes('localhost')
+          ? this.config.baseUrl
           : this.config.baseUrl
-        
+
         const requestBody = {
           model: this.config.model,
           messages: [
@@ -98,7 +100,7 @@ export class OllamaService {
               content: prompt
             }
           ],
-          stream: false, // Temporarily disabled for debugging
+          stream: true,
           ...options,
         }
         
@@ -146,6 +148,7 @@ export class OllamaService {
             const json = JSON.parse(line)
             // Handle chat endpoint response format
             if (json.message && json.message.content) {
+              // hasReceivedResponse = true
               yield json.message.content
             }
           } catch (parseError) {
@@ -161,12 +164,18 @@ export class OllamaService {
           const json = JSON.parse(buffer)
           // Handle chat endpoint response format
           if (json.message && json.message.content) {
+            // hasReceivedResponse = true
             yield json.message.content
           }
         } catch (parseError) {
           console.error('Final parse error:', parseError)
         }
       }
+      
+      // If we haven't received any response, it might be a slow model
+      // if (!hasReceivedResponse) {
+      //   console.warn('No response received from model - it might be initializing')
+      // }
 
       this.handleSuccess()
     } catch (error) {

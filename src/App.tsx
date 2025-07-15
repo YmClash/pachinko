@@ -3,14 +3,14 @@ import './styles/neon-theme.css'
 import './styles/animations.css'
 import { Header, Sidebar, SettingsPanel } from '@/components/Layout'
 import { ChatWindow } from '@/components/Chat'
-import { PachinkoBackground } from '@/components/Pachinko'
+/*import { PachinkoBackground } from '@/components/Pachinko'*/
 import { SplashScreen } from '@/components/UI/SplashScreen'
 import { ToastContainer, useToast } from '@/components/UI/Toast'
 import { useStore } from '@/store'
 import { initializeOllamaService } from '@/services/ollama.service'
 
 function App() {
-  const { loadFromStorage, isSidebarOpen, enable3D, selectedModel } = useStore()
+  const { loadFromStorage, isSidebarOpen, /*enable3D,*/ selectedModel } = useStore()
   const [isLoading, setIsLoading] = useState(true)
   const { toasts, showToast, removeToast } = useToast()
 
