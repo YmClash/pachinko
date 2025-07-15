@@ -1,0 +1,96 @@
+{
+  "name": "Pachinko Chat Dev Environment",
+  "dockerFile": "Dockerfile",
+  "context": "..",
+  
+  // Features to add to the dev container
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {},
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // Configure tool-specific properties
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "formulahendry.auto-rename-tag",
+        "steoates.autoimport",
+        "yoavbls.pretty-ts-errors",
+        "christian-kohler.npm-intellisense",
+        "christian-kohler.path-intellisense",
+        "mikestead.dotenv",
+        "usernamehw.errorlens",
+        "oderwat.indent-rainbow",
+        "PKief.material-icon-theme",
+        "zhuangtongfa.material-theme",
+        "naumovs.color-highlight"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        "tailwindCSS.experimental.classRegex": [
+          ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+        ]
+      }
+    }
+  },
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally
+  "forwardPorts": [5173, 11434],
+  "portsAttributes": {
+    "5173": {
+      "label": "Vite Dev Server",
+      "onAutoForward": "openBrowser"
+    },
+    "11434": {
+      "label": "Ollama API",
+      "onAutoForward": "notify"
+    }
+  },
+
+  // Use 'postCreateCommand' to run commands after the container is created
+  "postCreateCommand": "npm install && ./scripts/setup-ollama.sh",
+
+  // Use 'postStartCommand' to run commands after the container starts
+  "postStartCommand": "ollama serve & npm run dev -- --host",
+
+  // Environment variables
+  "containerEnv": {
+    "VITE_OLLAMA_URL": "http://localhost:11434",
+    "VITE_DEFAULT_MODEL": "qwen2:7b",
+    "VITE_ENABLE_SOUNDS": "true",
+    "VITE_ENABLE_3D": "true"
+  },
+
+  // Run as non-root user
+  "remoteUser": "node",
+
+  // Mounts
+  "mounts": [
+    "source=${localWorkspaceFolder}/node_modules,target=/workspace/node_modules,type=bind,consistency=delegated",
+    "source=pachinko-ollama-models,target=/root/.ollama,type=volume"
+  ],
+
+  // Features
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--security-opt",
+    "seccomp=unconfined"
+  ]
+}

@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # Ollama service with GPU support (if available)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: pachinko-ollama-dev
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+      - ./models:/models
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_MODELS=/models
+      - OLLAMA_DEBUG=1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - pachinko-network
+
+  # Model loader - pulls models automatically
+  model-loader:
+    image: ollama/ollama:latest
+    container_name: pachinko-model-loader
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ollama-models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    command: |
+      sh -c "
+        echo 'Waiting for Ollama to be ready...'
+        sleep 10
+        echo 'Pulling AI models...'
+        ollama pull qwen2:7b || true
+        ollama pull gemma2:9b || true
+        ollama pull llama3.2:latest || true
+        echo 'Models pulled successfully!'
+        ollama list
+      "
+    networks:
+      - pachinko-network
+
+  # Pachinko Chat application
+  pachinko:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    container_name: pachinko-chat-dev
+    ports:
+      - "5173:5173"
+      - "3000:3000"
+    volumes:
+      - .:/workspace:cached
+      - /workspace/node_modules
+      - ~/.gitconfig:/home/node/.gitconfig:ro
+    environment:
+      - NODE_ENV=development
+      - VITE_OLLAMA_URL=http://ollama:11434
+      - VITE_DEFAULT_MODEL=qwen2:7b
+      - VITE_ENABLE_SOUNDS=true
+      - VITE_ENABLE_3D=true
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      ollama:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    networks:
+      - pachinko-network
+
+  # Optional: Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: pachinko-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - pachinko
+      - ollama
+    profiles:
+      - with-proxy
+    networks:
+      - pachinko-network
+
+networks:
+  pachinko-network:
+    driver: bridge
+
+volumes:
+  ollama-models:
+    name: pachinko-ollama-models

@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Ollama service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: pachinko-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Pachinko Chat development
+  pachinko-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: pachinko-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_OLLAMA_URL=http://ollama:11434
+      - VITE_DEFAULT_MODEL=qwen2:7b
+      - VITE_ENABLE_SOUNDS=true
+      - VITE_ENABLE_3D=true
+    depends_on:
+      ollama:
+        condition: service_healthy
+    command: npm run dev -- --host
+    restart: unless-stopped
+
+  # Pachinko Chat production
+  pachinko-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: pachinko-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    profiles:
+      - production
+    restart: unless-stopped
+
+volumes:
+  ollama-models:
+    name: pachinko-ollama-models
