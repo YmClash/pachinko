@@ -65,7 +65,7 @@
   },
 
   // Use 'postCreateCommand' to run commands after the container is created
-  "postCreateCommand": "npm install && ./scripts/setup-ollama.sh",
+// "postCreateCommand": "npm install && ./scripts/setup-ollama.sh",
 
   // Use 'postStartCommand' to run commands after the container starts
   "postStartCommand": "ollama serve & npm run dev -- --host",

@@ -41,8 +41,14 @@ RUN curl -v https://registry.npmjs.com/
 # Install dependencies
 #RUN npm install
 
+RUN git clone https://github.com/YmClash/pachinko.git
+RUN cd pachinko && npm install
+
+
 # Copy the rest of the application
 COPY --chown=node:node . .
+
+
 
 # Expose ports
 EXPOSE 5173 11434
