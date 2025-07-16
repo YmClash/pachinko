@@ -77,7 +77,7 @@ ollama pull qwen2:7b || echo "Failed to pull qwen2:7b"\n\
 ollama pull gemma2:9b || echo "Failed to pull gemma2:9b"\n\
 echo ""\n\
 echo "🎮 Starting development server..."\n\
-npm run dev -- --host\n\
+npm run dev \n\
 ' > /home/node/start-dev.sh && chmod +x /home/node/start-dev.sh
 
 # Default command
