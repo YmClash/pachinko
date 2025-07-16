@@ -13,4 +13,3 @@ You can find free sound effects at:
 - https://www.zapsplat.com/
 - https://mixkit.co/free-sound-effects/
 
-Or use placeholder sounds for development.

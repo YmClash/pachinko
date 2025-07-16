@@ -67,7 +67,7 @@ jobs:
         echo "Deployment triggered for version ${{ github.ref_name }}"
         echo "Docker image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
     
-    # Add your deployment steps here
+    # Add others deployment steps here
     # Examples:
     # - Deploy to Kubernetes
     # - Deploy to Cloud Run
