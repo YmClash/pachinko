@@ -25,7 +25,7 @@ RUN mkdir -p /home/node/.ollama && chown -R node:node /home/node/.ollama
 USER node
 
 # Set working directory
-WORKDIR /workspace
+WORKDIR /workspace/pachinko
 
 
 
@@ -61,13 +61,13 @@ ENV VITE_ENABLE_3D=true
 
 # Create a startup script
 RUN echo '#!/bin/bash\n\
-echo "🚀 Starting Pachinko Chat Dev Environment..."\n\
+echo "🚀 Starting Pachinko Chat Dev Environment..by.YmC."\n\
 echo ""\n\
 echo "📦 Installing dependencies..."\n\
-npm install\n\
+ollama serve &\n\
 echo ""\n\
 echo "🤖 Starting Ollama service..."\n\
-ollama serve &\n\
+ls\n\
 OLLAMA_PID=$!\n\
 echo "Ollama PID: $OLLAMA_PID"\n\
 sleep 5\n\
