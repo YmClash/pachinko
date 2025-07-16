@@ -54,7 +54,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ isLoading }) => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              OLLAMA CHAT
+              OLLAMA CHAT By YmC
             </motion.p>
             
             <motion.div

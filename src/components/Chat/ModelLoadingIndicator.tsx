@@ -2,9 +2,9 @@ import { motion } from 'framer-motion'
 import { Cpu, Loader2 } from 'lucide-react'
 import { AnimatedIcon } from '@/components/UI'
 
-// interface ModelLoadingIndicatorProps {
-//   message?: string
-// }
+interface ModelLoadingIndicatorProps {
+  message?: string
+}
 
 export const ModelLoadingIndicator: React.FC<ModelLoadingIndicatorProps> = ({ 
   message = 'Model is initializing... This might take a moment for the first response.' 
