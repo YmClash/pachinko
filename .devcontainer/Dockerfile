@@ -46,7 +46,7 @@ RUN cd pachinko && npm install
 
 
 # Copy the rest of the application
-COPY --chown=node:node . .
+COPY --chown=node:node/pachinko . .
 
 
 

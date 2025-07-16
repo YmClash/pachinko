@@ -68,7 +68,8 @@
 // "postCreateCommand": "npm install && ./scripts/setup-ollama.sh",
 
   // Use 'postStartCommand' to run commands after the container starts
-  "postStartCommand": "ollama serve & npm run dev -- --host",
+  //"postStartCommand": "ollama serve & npm run dev -- --host",
+    "postStartCommand": "cd pachinko-chat && npm run dev",
 
   // Environment variables
   "containerEnv": {
